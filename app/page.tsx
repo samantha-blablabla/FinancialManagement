@@ -283,12 +283,17 @@ export default function HomePage() {
   const handleForgotPassword = (e: React.MouseEvent) => {
     e.preventDefault();
     setShowForgotPassword(true);
-    setSelectedSpace(null);
+    setLoginError(''); // Clear any login errors
   };
 
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     setResetError('');
+
+    if (!selectedSpace) {
+      setResetError('Vui lòng chọn không gian');
+      return;
+    }
 
     if (newPassword.length < 6) {
       setResetError('Mật khẩu phải có ít nhất 6 ký tự');
@@ -309,7 +314,7 @@ export default function HomePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          spaceId: resetSpaceId,
+          spaceId: selectedSpace.id,
           newPassword,
         }),
       });
@@ -321,12 +326,12 @@ export default function HomePage() {
         return;
       }
 
-      alert('Đặt lại mật khẩu thành công!');
+      // Show success and go back to login
       setShowForgotPassword(false);
-      setResetSpaceId('');
       setNewPassword('');
       setConfirmNewPassword('');
       setResetError('');
+      setLoginError('✓ Đặt lại mật khẩu thành công! Vui lòng đăng nhập với mật khẩu mới.');
     } catch (error) {
       console.error('Error resetting password:', error);
       setResetError('Không thể kết nối đến server');
@@ -527,14 +532,25 @@ export default function HomePage() {
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLoginSubmit} className="space-y-4">
+                {loginError && loginError.startsWith('✓') ? (
+                  <div className="p-3 bg-green-500/10 border border-green-500/50 rounded-lg text-green-400 text-sm">
+                    {loginError}
+                  </div>
+                ) : null}
                 <FormField
                   label="Mật khẩu"
                   type="password"
                   placeholder="Nhập mật khẩu"
                   required
                   value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  error={loginError}
+                  onChange={(e) => {
+                    setLoginPassword(e.target.value);
+                    // Clear success message when user starts typing
+                    if (loginError.startsWith('✓')) {
+                      setLoginError('');
+                    }
+                  }}
+                  error={loginError.startsWith('✓') ? '' : loginError}
                 />
                 <button
                   type="button"
@@ -569,34 +585,16 @@ export default function HomePage() {
         )}
 
         {/* Forgot Password Form */}
-        {showForgotPassword && (
+        {showForgotPassword && selectedSpace && (
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
-              <CardTitle>Đặt lại mật khẩu</CardTitle>
+              <CardTitle>Đặt lại mật khẩu cho {selectedSpace.name}</CardTitle>
               <CardDescription>
-                Chọn không gian và nhập mật khẩu mới
+                Nhập mật khẩu mới để đặt lại
               </CardDescription>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleResetPassword} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-stone-300 mb-2">
-                    Chọn không gian *
-                  </label>
-                  <select
-                    value={resetSpaceId}
-                    onChange={(e) => setResetSpaceId(e.target.value)}
-                    className="w-full px-4 py-2.5 bg-stone-800/50 border border-stone-700/50 rounded-lg text-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent"
-                    required
-                  >
-                    <option value="">-- Chọn không gian --</option>
-                    {spaces.map((space) => (
-                      <option key={space.id} value={space.id}>
-                        {space.name}
-                      </option>
-                    ))}
-                  </select>
-                </div>
                 <FormField
                   label="Mật khẩu mới"
                   type="password"
@@ -619,7 +617,6 @@ export default function HomePage() {
                     variant="ghost"
                     onClick={() => {
                       setShowForgotPassword(false);
-                      setResetSpaceId('');
                       setNewPassword('');
                       setConfirmNewPassword('');
                       setResetError('');
