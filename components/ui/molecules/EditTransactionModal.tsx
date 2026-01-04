@@ -56,6 +56,7 @@ export function EditTransactionModal({ isOpen, onClose, spaceId, transaction, on
       setNotes(transaction.notes || '');
       fetchCategories(transaction.type);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, transaction]);
 
   const fetchCategories = async (transactionType: 'income' | 'expense') => {
