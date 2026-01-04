@@ -101,15 +101,20 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
     onClose();
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) {
+    console.log('Modal is closed');
+    return null;
+  }
+
+  console.log('Modal is open, rendering...');
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="w-full max-w-md backdrop-blur-xl bg-stone-900/90 border border-stone-700/50 rounded-lg shadow-2xl">
-        <div className="p-6">
-          <h2 className="text-2xl font-bold text-stone-100 mb-6">Thêm giao dịch</h2>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
+      <div className="w-full max-w-md my-8 backdrop-blur-xl bg-stone-900/90 border border-stone-700/50 rounded-lg shadow-2xl">
+        <div className="p-4 md:p-6 max-h-[90vh] overflow-y-auto">
+          <h2 className="text-xl md:text-2xl font-bold text-stone-100 mb-4 md:mb-6">Thêm giao dịch</h2>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-3 md:space-y-4">
             {/* Type Selection */}
             <div>
               <Label>Loại giao dịch</Label>
@@ -117,7 +122,7 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
                 <button
                   type="button"
                   onClick={() => setType('income')}
-                  className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all ${
                     type === 'income'
                       ? 'bg-green-500/20 text-green-400 border-2 border-green-500/50'
                       : 'bg-stone-800/50 text-stone-400 border border-stone-700/50 hover:border-stone-600'
@@ -128,7 +133,7 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
                 <button
                   type="button"
                   onClick={() => setType('expense')}
-                  className={`px-4 py-3 rounded-lg font-medium transition-all ${
+                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all ${
                     type === 'expense'
                       ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50'
                       : 'bg-stone-800/50 text-stone-400 border border-stone-700/50 hover:border-stone-600'
@@ -204,8 +209,8 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Thêm ghi chú..."
-                rows={3}
-                className="w-full px-4 py-2.5 bg-stone-800/50 border border-stone-700/50 rounded-lg text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent resize-none"
+                rows={2}
+                className="w-full px-3 md:px-4 py-2 md:py-2.5 text-sm md:text-base bg-stone-800/50 border border-stone-700/50 rounded-lg text-stone-100 placeholder:text-stone-500 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent resize-none"
               />
             </div>
 
