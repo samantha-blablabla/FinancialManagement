@@ -4,12 +4,20 @@ import bcrypt from 'bcryptjs';
 
 export async function POST(request: NextRequest) {
   try {
-    const { spaceName, password } = await request.json();
+    const { spaceName, password, currencies = ['VND'] } = await request.json();
 
     // Validate input
     if (!spaceName || !password) {
       return NextResponse.json(
         { error: 'Tên space và mật khẩu là bắt buộc' },
+        { status: 400 }
+      );
+    }
+
+    // Validate currencies
+    if (!Array.isArray(currencies) || currencies.length === 0) {
+      return NextResponse.json(
+        { error: 'Phải chọn ít nhất một loại tiền tệ' },
         { status: 400 }
       );
     }
@@ -53,7 +61,8 @@ export async function POST(request: NextRequest) {
         name: spaceName,
         password_hash: passwordHash,
         owner_id: tempUserId,
-        currency: 'VND',
+        currency: currencies[0], // Keep first currency in legacy field for backward compatibility
+        currencies: currencies, // New field - array of currencies
       })
       .select()
       .single();
@@ -123,6 +132,7 @@ export async function POST(request: NextRequest) {
         id: space.id,
         name: space.name,
         currency: space.currency,
+        currencies: space.currencies,
       },
     });
   } catch (error) {

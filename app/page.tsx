@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
 import { FormField } from '@/components/ui/molecules/FormField';
+import { CurrencySelector } from '@/components/ui/molecules/CurrencySelector';
 import { Lock, Pencil, Trash2, KeyRound } from 'lucide-react';
 import { EditSpaceModal } from '@/components/ui/molecules/EditSpaceModal';
 import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
@@ -12,7 +13,8 @@ import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
 interface Space {
   id: string;
   name: string;
-  currency: string;
+  currency: string; // Legacy field
+  currencies: string[]; // New field
   created_at: string;
 }
 
@@ -25,6 +27,7 @@ export default function HomePage() {
 
   // Form state
   const [spaceName, setSpaceName] = useState('');
+  const [selectedCurrencies, setSelectedCurrencies] = useState<string[]>(['VND']); // Default to VND
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -132,6 +135,7 @@ export default function HomePage() {
         body: JSON.stringify({
           spaceName,
           password,
+          currencies: selectedCurrencies,
         }),
       });
 
@@ -169,6 +173,7 @@ export default function HomePage() {
   const handleCancel = () => {
     setShowCreateSpace(false);
     setSpaceName('');
+    setSelectedCurrencies(['VND']); // Reset to default
     setPassword('');
     setConfirmPassword('');
     setErrors({ spaceName: '', password: '', confirmPassword: '' });
@@ -411,6 +416,12 @@ export default function HomePage() {
                 onChange={handleSpaceNameChange}
                 error={errors.spaceName}
               />
+              <CurrencySelector
+                selectedCurrencies={selectedCurrencies}
+                onChange={setSelectedCurrencies}
+                label="Loại tiền tệ"
+                required
+              />
               <FormField
                 label="Mật khẩu"
                 type="password"
@@ -456,10 +467,21 @@ export default function HomePage() {
         {showSelectSpace && !selectedSpace && (
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
-              <CardTitle>Chọn Space</CardTitle>
-              <CardDescription>
-                Chọn không gian để truy cập
-              </CardDescription>
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex-1">
+                  <CardTitle>Chọn Space</CardTitle>
+                  <CardDescription>
+                    Chọn không gian để truy cập
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="ghost"
+                  onClick={() => setShowSelectSpace(false)}
+                  className="flex-shrink-0"
+                >
+                  Quay lại
+                </Button>
+              </div>
             </CardHeader>
             <CardContent className="space-y-4">
               {spaces.length === 0 ? (
@@ -508,15 +530,6 @@ export default function HomePage() {
                   ))}
                 </div>
               )}
-              <div className="flex gap-3 pt-2">
-                <Button
-                  variant="ghost"
-                  onClick={() => setShowSelectSpace(false)}
-                  className="flex-1"
-                >
-                  Quay lại
-                </Button>
-              </div>
             </CardContent>
           </Card>
         )}

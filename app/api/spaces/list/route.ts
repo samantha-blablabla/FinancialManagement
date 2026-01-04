@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
     // Fetch all spaces with basic info (no password hash)
     const { data: spaces, error } = await supabase
       .from('spaces')
-      .select('id, name, currency, created_at')
+      .select('id, name, currency, currencies, created_at')
       .order('created_at', { ascending: false });
 
     if (error) {
