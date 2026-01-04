@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/atoms/Button';
 import { AddTransactionModal } from '@/components/ui/molecules/AddTransactionModal';
 import { EditTransactionModal } from '@/components/ui/molecules/EditTransactionModal';
+import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
 import { CategoryIcon } from '@/components/ui/atoms/CategoryIcon';
 import { Pencil, Trash2 } from 'lucide-react';
 
@@ -39,7 +40,9 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
   const [summary, setSummary] = useState({
     totalIncome: 0,
     totalExpense: 0,
@@ -116,13 +119,16 @@ export default function TransactionsPage() {
     setIsEditModalOpen(true);
   };
 
-  const handleDeleteTransaction = async (transactionId: string) => {
-    if (!confirm('Bạn có chắc chắn muốn xóa giao dịch này?')) {
-      return;
-    }
+  const handleDeleteClick = (transactionId: string) => {
+    setDeletingTransactionId(transactionId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingTransactionId) return;
 
     try {
-      const response = await fetch(`/api/transactions/delete?id=${transactionId}`, {
+      const response = await fetch(`/api/transactions/delete?id=${deletingTransactionId}`, {
         method: 'DELETE',
       });
 
@@ -138,6 +144,8 @@ export default function TransactionsPage() {
     } catch (error) {
       console.error('Error deleting transaction:', error);
       alert('Không thể kết nối đến server');
+    } finally {
+      setDeletingTransactionId(null);
     }
   };
 
@@ -275,7 +283,7 @@ export default function TransactionsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1 md:gap-4 flex-shrink-0">
+                      <div className="flex items-center gap-2 md:gap-4 flex-shrink-0">
                         <div className="text-right">
                           <div className="text-sm md:text-lg font-semibold text-stone-100 whitespace-nowrap">
                             {transaction.type === 'income' ? '+' : '-'}
@@ -285,17 +293,17 @@ export default function TransactionsPage() {
                             {formatDate(transaction.date)}
                           </div>
                         </div>
-                        <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1 md:gap-2">
                           <button
                             onClick={() => handleEditTransaction(transaction)}
-                            className="p-1.5 md:p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
+                            className="p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
                             title="Chỉnh sửa"
                           >
                             <Pencil size={16} className="md:w-[18px] md:h-[18px]" />
                           </button>
                           <button
-                            onClick={() => handleDeleteTransaction(transaction.id)}
-                            className="p-1.5 md:p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            onClick={() => handleDeleteClick(transaction.id)}
+                            className="p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Xóa"
                           >
                             <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
@@ -329,6 +337,21 @@ export default function TransactionsPage() {
         spaceId={space.id}
         transaction={editingTransaction}
         onSuccess={handleTransactionAdded}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => {
+          setIsDeleteDialogOpen(false);
+          setDeletingTransactionId(null);
+        }}
+        onConfirm={handleConfirmDelete}
+        title="Xóa giao dịch"
+        message="Bạn có chắc chắn muốn xóa giao dịch này? Hành động này không thể hoàn tác."
+        confirmText="Xóa"
+        cancelText="Hủy"
+        variant="danger"
       />
     </div>
   );

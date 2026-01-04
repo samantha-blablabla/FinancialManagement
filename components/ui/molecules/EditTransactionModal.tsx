@@ -217,7 +217,7 @@ export function EditTransactionModal({ isOpen, onClose, spaceId, transaction, on
               >
                 {categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.icon} {cat.name}
+                    {cat.name}
                   </option>
                 ))}
               </select>
