@@ -24,7 +24,7 @@ interface Transaction {
     name: string;
     icon: string;
     color: string;
-  };
+  } | null;
 }
 
 export default function TransactionsPage() {
@@ -208,41 +208,50 @@ export default function TransactionsPage() {
               </div>
             ) : (
               <div className="space-y-3">
-                {transactions.map((transaction) => (
-                  <div
-                    key={transaction.id}
-                    className="flex items-center justify-between p-4 bg-stone-800/30 border border-stone-700/30 rounded-lg hover:bg-stone-800/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
-                        style={{ backgroundColor: `${transaction.category.color}20` }}
-                      >
-                        {transaction.category.icon}
+                {transactions.map((transaction) => {
+                  // Handle transactions with deleted or missing categories
+                  const category = transaction.category || {
+                    icon: '💰',
+                    name: 'Không xác định',
+                    color: '#64748b'
+                  };
+
+                  return (
+                    <div
+                      key={transaction.id}
+                      className="flex items-center justify-between p-4 bg-stone-800/30 border border-stone-700/30 rounded-lg hover:bg-stone-800/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                          style={{ backgroundColor: `${category.color}20` }}
+                        >
+                          {category.icon}
+                        </div>
+                        <div>
+                          <h3 className="text-stone-100 font-medium">
+                            {transaction.description}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm text-stone-400">
+                            <span>{category.name}</span>
+                            <span>•</span>
+                            <span>{formatDate(transaction.date)}</span>
+                          </div>
+                        </div>
                       </div>
-                      <div>
-                        <h3 className="text-stone-100 font-medium">
-                          {transaction.description}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm text-stone-400">
-                          <span>{transaction.category.name}</span>
-                          <span>•</span>
-                          <span>{formatDate(transaction.date)}</span>
+                      <div className="text-right">
+                        <div
+                          className={`text-lg font-semibold ${
+                            transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
+                          }`}
+                        >
+                          {transaction.type === 'income' ? '+' : '-'}
+                          {formatCurrency(transaction.amount)} {space.currency}
                         </div>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div
-                        className={`text-lg font-semibold ${
-                          transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
-                        }`}
-                      >
-                        {transaction.type === 'income' ? '+' : '-'}
-                        {formatCurrency(transaction.amount)} {space.currency}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </CardContent>
