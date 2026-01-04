@@ -23,6 +23,7 @@ interface AddTransactionModalProps {
 export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: AddTransactionModalProps) {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
+  const [displayAmount, setDisplayAmount] = useState('');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [categoryId, setCategoryId] = useState('');
@@ -51,6 +52,34 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
+  };
+
+  const formatCurrency = (value: string) => {
+    // Remove all non-digit characters
+    const numericValue = value.replace(/\D/g, '');
+
+    if (!numericValue) return '';
+
+    // Format with thousand separators
+    return new Intl.NumberFormat('vi-VN').format(parseInt(numericValue));
+  };
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value.replace(/\D/g, ''); // Only keep digits
+    setAmount(value);
+    setDisplayAmount(formatCurrency(value));
+  };
+
+  const formatDateForInput = (dateStr: string) => {
+    // Convert YYYY-MM-DD to DD/MM/YYYY for display
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  };
+
+  const parseDateFromInput = (dateStr: string) => {
+    // Convert DD/MM/YYYY back to YYYY-MM-DD for storage
+    const [day, month, year] = dateStr.split('/');
+    return `${year}-${month}-${day}`;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -94,6 +123,7 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
 
   const handleClose = () => {
     setAmount('');
+    setDisplayAmount('');
     setDescription('');
     setDate(new Date().toISOString().split('T')[0]);
     setNotes('');
@@ -146,11 +176,9 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
               <Label htmlFor="amount">Số tiền *</Label>
               <Input
                 id="amount"
-                type="number"
-                step="1000"
-                min="0"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
+                type="text"
+                value={displayAmount}
+                onChange={handleAmountChange}
                 placeholder="0"
                 required
               />

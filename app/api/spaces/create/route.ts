@@ -90,7 +90,6 @@ export async function POST(request: NextRequest) {
       // Income categories
       { name: 'Lương', type: 'income', icon: '💼', color: '#10b981', is_system: true },
       { name: 'Thưởng', type: 'income', icon: '🎁', color: '#3b82f6', is_system: true },
-      { name: 'Đầu tư', type: 'income', icon: '📈', color: '#8b5cf6', is_system: true },
       { name: 'Thu nhập khác', type: 'income', icon: '💰', color: '#06b6d4', is_system: true },
 
       // Expense categories
