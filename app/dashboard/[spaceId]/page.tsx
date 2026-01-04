@@ -4,6 +4,9 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
+import { EditSpaceModal } from '@/components/ui/molecules/EditSpaceModal';
+import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
+import { Settings, Pencil, Trash2 } from 'lucide-react';
 
 interface Space {
   id: string;
@@ -15,6 +18,9 @@ export default function DashboardPage() {
   const params = useParams();
   const router = useRouter();
   const [space, setSpace] = useState<Space | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   useEffect(() => {
     console.log('Dashboard mounted, spaceId from URL:', params.spaceId);
@@ -46,6 +52,44 @@ export default function DashboardPage() {
     }
   }, [params.spaceId, router]);
 
+  const handleEditSuccess = () => {
+    // Reload space data from API
+    const fetchSpace = async () => {
+      try {
+        const response = await fetch(`/api/spaces/${space?.id}`);
+        if (response.ok) {
+          const data = await response.json();
+          setSpace(data.space);
+          localStorage.setItem('currentSpace', JSON.stringify(data.space));
+        }
+      } catch (error) {
+        console.error('Error fetching updated space:', error);
+      }
+    };
+    fetchSpace();
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!space) return;
+
+    try {
+      const response = await fetch(`/api/spaces/delete?id=${space.id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        localStorage.removeItem('currentSpace');
+        router.push('/');
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Không thể xóa không gian');
+      }
+    } catch (error) {
+      console.error('Error deleting space:', error);
+      alert('Không thể kết nối đến server');
+    }
+  };
+
   if (!space) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -75,16 +119,52 @@ export default function DashboardPage() {
                 Không gian quản lý tài chính của bạn
               </p>
             </div>
-            {/* Logout button temporarily hidden - will implement proper auth later */}
-            {/* <Button
-              variant="ghost"
-              onClick={() => {
-                localStorage.removeItem('currentSpace');
-                router.push('/');
-              }}
-            >
-              Đăng xuất
-            </Button> */}
+            <div className="relative">
+              <Button
+                variant="ghost"
+                onClick={() => setShowSettings(!showSettings)}
+                className="flex items-center gap-2"
+              >
+                <Settings size={20} />
+                Cài đặt
+              </Button>
+
+              {showSettings && (
+                <>
+                  {/* Backdrop to close dropdown when clicking outside */}
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowSettings(false)}
+                  />
+
+                  {/* Dropdown menu */}
+                  <div className="absolute right-0 mt-2 w-56 backdrop-blur-xl bg-stone-900/90 border border-stone-700/50 rounded-lg shadow-2xl z-20">
+                    <div className="p-2">
+                      <button
+                        onClick={() => {
+                          setShowSettings(false);
+                          setIsEditModalOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-300 hover:bg-stone-800/50 rounded-lg transition-colors"
+                      >
+                        <Pencil size={16} />
+                        Chỉnh sửa không gian
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowSettings(false);
+                          setIsDeleteDialogOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={16} />
+                        Xóa không gian
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
@@ -178,6 +258,26 @@ export default function DashboardPage() {
           </Card>
         </div>
       </div>
+
+      {/* Edit Space Modal */}
+      <EditSpaceModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        space={space}
+        onSuccess={handleEditSuccess}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={isDeleteDialogOpen}
+        onClose={() => setIsDeleteDialogOpen(false)}
+        onConfirm={handleDeleteConfirm}
+        title="Xóa không gian"
+        message="Bạn có chắc chắn muốn xóa không gian này? Tất cả dữ liệu bao gồm giao dịch, danh mục sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
+        confirmText="Xóa vĩnh viễn"
+        cancelText="Hủy"
+        variant="danger"
+      />
     </div>
   );
 }
