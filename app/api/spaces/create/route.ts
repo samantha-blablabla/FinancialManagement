@@ -88,19 +88,19 @@ export async function POST(request: NextRequest) {
     // Create default transaction categories
     const defaultCategories = [
       // Income categories
-      { name: 'Lương', type: 'income', icon: 'Briefcase', color: '#10b981', is_system: true },
-      { name: 'Thưởng', type: 'income', icon: 'Gift', color: '#3b82f6', is_system: true },
-      { name: 'Thu nhập khác', type: 'income', icon: 'Coins', color: '#06b6d4', is_system: true },
+      { name: 'Lương', type: 'income', icon: '💼', color: '#10b981', is_system: true },
+      { name: 'Thưởng', type: 'income', icon: '🎁', color: '#3b82f6', is_system: true },
+      { name: 'Thu nhập khác', type: 'income', icon: '💰', color: '#06b6d4', is_system: true },
 
       // Expense categories
-      { name: 'Ăn uống', type: 'expense', icon: 'Utensils', color: '#ef4444', is_system: true },
-      { name: 'Di chuyển', type: 'expense', icon: 'Car', color: '#f59e0b', is_system: true },
-      { name: 'Mua sắm', type: 'expense', icon: 'ShoppingCart', color: '#ec4899', is_system: true },
-      { name: 'Nhà cửa', type: 'expense', icon: 'Home', color: '#6366f1', is_system: true },
-      { name: 'Giải trí', type: 'expense', icon: 'Gamepad2', color: '#a855f7', is_system: true },
-      { name: 'Sức khỏe', type: 'expense', icon: 'HeartPulse', color: '#14b8a6', is_system: true },
-      { name: 'Giáo dục', type: 'expense', icon: 'GraduationCap', color: '#0ea5e9', is_system: true },
-      { name: 'Chi phí khác', type: 'expense', icon: 'Wallet', color: '#64748b', is_system: true },
+      { name: 'Ăn uống', type: 'expense', icon: '🍔', color: '#ef4444', is_system: true },
+      { name: 'Di chuyển', type: 'expense', icon: '🚗', color: '#f59e0b', is_system: true },
+      { name: 'Mua sắm', type: 'expense', icon: '🛒', color: '#ec4899', is_system: true },
+      { name: 'Nhà cửa', type: 'expense', icon: '🏠', color: '#6366f1', is_system: true },
+      { name: 'Giải trí', type: 'expense', icon: '🎮', color: '#a855f7', is_system: true },
+      { name: 'Sức khỏe', type: 'expense', icon: '⚕️', color: '#14b8a6', is_system: true },
+      { name: 'Giáo dục', type: 'expense', icon: '📚', color: '#0ea5e9', is_system: true },
+      { name: 'Chi phí khác', type: 'expense', icon: '💸', color: '#64748b', is_system: true },
     ];
 
     const categoriesToInsert = defaultCategories.map(cat => ({

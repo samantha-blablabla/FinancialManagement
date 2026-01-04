@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';
 import { Label } from '../atoms/Label';
+import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface Category {
   id: string;
@@ -149,24 +150,26 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
                 <button
                   type="button"
                   onClick={() => setType('income')}
-                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all ${
+                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all flex items-center justify-center gap-2 ${
                     type === 'income'
-                      ? 'bg-green-500/20 text-green-400 border-2 border-green-500/50'
+                      ? 'bg-stone-700/50 text-stone-100 border-2 border-stone-500/50'
                       : 'bg-stone-800/50 text-stone-400 border border-stone-700/50 hover:border-stone-600'
                   }`}
                 >
-                  💰 Thu nhập
+                  <TrendingUp size={18} />
+                  Thu nhập
                 </button>
                 <button
                   type="button"
                   onClick={() => setType('expense')}
-                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all ${
+                  className={`px-3 md:px-4 py-2 md:py-3 rounded-lg font-medium text-sm md:text-base transition-all flex items-center justify-center gap-2 ${
                     type === 'expense'
-                      ? 'bg-red-500/20 text-red-400 border-2 border-red-500/50'
+                      ? 'bg-stone-700/50 text-stone-100 border-2 border-stone-500/50'
                       : 'bg-stone-800/50 text-stone-400 border border-stone-700/50 hover:border-stone-600'
                   }`}
                 >
-                  💸 Chi tiêu
+                  <TrendingDown size={18} />
+                  Chi tiêu
                 </button>
               </div>
             </div>

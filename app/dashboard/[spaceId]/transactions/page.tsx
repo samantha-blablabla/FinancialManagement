@@ -5,7 +5,6 @@ import { useParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
 import { AddTransactionModal } from '@/components/ui/molecules/AddTransactionModal';
-import { DynamicIcon } from '@/components/ui/atoms/DynamicIcon';
 import { Pencil, Trash2 } from 'lucide-react';
 
 interface Space {
@@ -213,7 +212,7 @@ export default function TransactionsPage() {
                 {transactions.map((transaction) => {
                   // Handle transactions with deleted or missing categories
                   const category = transaction.category || {
-                    icon: 'Wallet',
+                    icon: '💰',
                     name: 'Không xác định',
                     color: '#64748b'
                   };
@@ -225,10 +224,10 @@ export default function TransactionsPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center"
+                          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
                           style={{ backgroundColor: `${category.color}20` }}
                         >
-                          <DynamicIcon name={category.icon} size={24} style={{ color: category.color }} />
+                          {category.icon}
                         </div>
                         <div>
                           <h3 className="text-stone-100 font-medium">
