@@ -68,3 +68,123 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-stone-600);
 }
+
+/* Particles animation for background */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0) translateX(0);
+  }
+  33% {
+    transform: translateY(-20px) translateX(10px);
+  }
+  66% {
+    transform: translateY(20px) translateX(-10px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0) translateX(0) scale(1);
+  }
+  50% {
+    transform: translateY(-30px) translateX(-15px) scale(1.1);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.animate-gradient {
+  position: relative;
+  background: var(--color-background);
+  overflow: hidden;
+}
+
+/* Particle 1 - Top Left */
+.animate-gradient::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(
+    circle,
+    rgba(120, 113, 108, 0.08) 0%,
+    rgba(87, 83, 78, 0.04) 50%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: float 25s ease-in-out infinite, pulse 8s ease-in-out infinite;
+  z-index: 0;
+}
+
+/* Particle 2 - Top Right */
+.animate-gradient::after {
+  content: '';
+  position: absolute;
+  top: 20%;
+  right: 15%;
+  width: 250px;
+  height: 250px;
+  background: radial-gradient(
+    circle,
+    rgba(168, 162, 158, 0.06) 0%,
+    rgba(120, 113, 108, 0.03) 50%,
+    transparent 100%
+  );
+  border-radius: 50%;
+  filter: blur(50px);
+  animation: float-delayed 20s ease-in-out infinite, pulse 10s ease-in-out infinite 2s;
+  z-index: 0;
+}
+
+/* Additional particles container */
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(120, 113, 108, 0.1), transparent);
+  filter: blur(40px);
+}
+
+.particle:nth-child(1) {
+  width: 200px;
+  height: 200px;
+  bottom: 15%;
+  left: 20%;
+  animation: float 30s ease-in-out infinite, pulse 12s ease-in-out infinite 1s;
+}
+
+.particle:nth-child(2) {
+  width: 180px;
+  height: 180px;
+  bottom: 25%;
+  right: 25%;
+  animation: float-delayed 28s ease-in-out infinite, pulse 15s ease-in-out infinite 3s;
+}
+
+.particle:nth-child(3) {
+  width: 150px;
+  height: 150px;
+  top: 50%;
+  left: 50%;
+  animation: float 22s ease-in-out infinite, pulse 10s ease-in-out infinite 5s;
+}

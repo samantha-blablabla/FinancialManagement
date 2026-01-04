@@ -34,18 +34,11 @@ export async function middleware(request: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
-                     request.nextUrl.pathname.startsWith('/register');
   const isDashboard = request.nextUrl.pathname.startsWith('/dashboard');
 
-  // Redirect to login if accessing dashboard without session
+  // Redirect to home if accessing dashboard without session
   if (isDashboard && !session) {
-    return NextResponse.redirect(new URL('/login', request.url));
-  }
-
-  // Redirect to dashboard if accessing auth pages with session
-  if (isAuthPage && session) {
-    return NextResponse.redirect(new URL('/dashboard', request.url));
+    return NextResponse.redirect(new URL('/', request.url));
   }
 
   return supabaseResponse;
