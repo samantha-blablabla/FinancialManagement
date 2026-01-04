@@ -22,7 +22,8 @@
       "Bash(node -e:*)",
       "Bash(npm install:*)",
       "Bash(node scripts/run-migration.js:*)",
-      "Bash(node scripts/open-migration.js:*)"
+      "Bash(node scripts/open-migration.js:*)",
+      "Bash(grep:*)"
     ]
   }
 }

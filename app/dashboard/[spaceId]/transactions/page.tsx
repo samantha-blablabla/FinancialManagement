@@ -9,6 +9,7 @@ import { EditTransactionModal } from '@/components/ui/molecules/EditTransactionM
 import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
 import { CategoryIcon } from '@/components/ui/atoms/CategoryIcon';
 import { Pencil, Trash2 } from 'lucide-react';
+import { getCurrencySymbol } from '@/types';
 
 interface Space {
   id: string;
@@ -289,7 +290,7 @@ export default function TransactionsPage() {
                         <div className="text-right">
                           <div className="text-sm md:text-lg font-semibold text-stone-100 whitespace-nowrap">
                             {transaction.type === 'income' ? '+' : '-'}
-                            {formatCurrency(transaction.amount)}
+                            {formatCurrency(transaction.amount)} {getCurrencySymbol(transaction.currency || space.currency)}
                           </div>
                           <div className="text-xs text-stone-500 md:hidden">
                             {formatDate(transaction.date)}
@@ -337,6 +338,7 @@ export default function TransactionsPage() {
           setIsEditModalOpen(false);
           setEditingTransaction(null);
         }}
+        spaceCurrencies={space.currencies || [space.currency || 'VND']},
         spaceId={space.id}
         transaction={editingTransaction}
         onSuccess={handleTransactionAdded}

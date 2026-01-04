@@ -5,6 +5,7 @@ import { Button } from '../atoms/Button';
 import { Input } from '../atoms/Input';
 import { Label } from '../atoms/Label';
 import { TrendingUp, TrendingDown } from 'lucide-react';
+import { getCurrencySymbol } from '@/types';
 
 interface Category {
   id: string;
@@ -18,6 +19,7 @@ interface Transaction {
   id: string;
   type: 'income' | 'expense';
   amount: number;
+  currency?: string;
   description: string;
   date: string;
   notes: string | null;
@@ -28,14 +30,16 @@ interface EditTransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   spaceId: string;
+  spaceCurrencies?: string[];
   transaction: Transaction | null;
   onSuccess: () => void;
 }
 
-export function EditTransactionModal({ isOpen, onClose, spaceId, transaction, onSuccess }: EditTransactionModalProps) {
+export function EditTransactionModal({ isOpen, onClose, spaceId, spaceCurrencies = ['VND'], transaction, onSuccess }: EditTransactionModalProps) {
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
   const [displayAmount, setDisplayAmount] = useState('');
+  const [currency, setCurrency] = useState(spaceCurrencies[0] || 'VND');
   const [description, setDescription] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [categoryId, setCategoryId] = useState('');
@@ -50,6 +54,7 @@ export function EditTransactionModal({ isOpen, onClose, spaceId, transaction, on
       setType(transaction.type);
       setAmount(transaction.amount.toString());
       setDisplayAmount(formatCurrency(transaction.amount.toString()));
+      setCurrency(transaction.currency || spaceCurrencies[0] || 'VND');
       setDescription(transaction.description);
       setDate(transaction.date);
       setCategoryId(transaction.category_id);
@@ -105,6 +110,7 @@ export function EditTransactionModal({ isOpen, onClose, spaceId, transaction, on
           id: transaction.id,
           type,
           amount: parseFloat(amount),
+          currency,
           description,
           date,
           categoryId,
@@ -192,6 +198,25 @@ export function EditTransactionModal({ isOpen, onClose, spaceId, transaction, on
                 required
               />
             </div>
+
+            {/* Currency (only show if multiple currencies available) */}
+            {spaceCurrencies.length > 1 && (
+              <div>
+                <Label htmlFor="currency">Loại tiền tệ</Label>
+                <select
+                  id="currency"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-stone-800/50 border border-stone-700/50 rounded-lg text-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent"
+                >
+                  {spaceCurrencies.map((curr) => (
+                    <option key={curr} value={curr}>
+                      {getCurrencySymbol(curr)} {curr}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
 
             {/* Description */}
             <div>
