@@ -338,7 +338,7 @@ export default function TransactionsPage() {
           setIsEditModalOpen(false);
           setEditingTransaction(null);
         }}
-        spaceCurrencies={space.currencies || [space.currency || 'VND']},
+        spaceCurrencies={space.currencies || [space.currency || 'VND']}
         spaceId={space.id}
         transaction={editingTransaction}
         onSuccess={handleTransactionAdded}
