@@ -102,11 +102,8 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, onSuccess }: Add
   };
 
   if (!isOpen) {
-    console.log('Modal is closed');
     return null;
   }
-
-  console.log('Modal is open, rendering...');
 
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">

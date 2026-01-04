@@ -34,11 +34,6 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Debug: log when modal state changes
-  useEffect(() => {
-    console.log('isModalOpen state changed:', isModalOpen);
-  }, [isModalOpen]);
   const [summary, setSummary] = useState({
     totalIncome: 0,
     totalExpense: 0,
@@ -148,10 +143,7 @@ export default function TransactionsPage() {
               </Button>
               <Button
                 variant="primary"
-                onClick={() => {
-                  console.log('Button clicked, opening modal');
-                  setIsModalOpen(true);
-                }}
+                onClick={() => setIsModalOpen(true)}
               >
                 + Thêm giao dịch
               </Button>
@@ -209,10 +201,7 @@ export default function TransactionsPage() {
                 </p>
                 <Button
                   variant="primary"
-                  onClick={() => {
-                    console.log('Empty state button clicked, opening modal');
-                    setIsModalOpen(true);
-                  }}
+                  onClick={() => setIsModalOpen(true)}
                 >
                   Thêm giao dịch đầu tiên
                 </Button>
