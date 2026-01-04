@@ -97,6 +97,7 @@ export function AddTransactionModal({ isOpen, onClose, spaceId, spaceCurrencies 
         headers: {
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         body: JSON.stringify({
           spaceId,
           type,

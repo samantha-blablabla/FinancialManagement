@@ -39,20 +39,25 @@
 
 #### Molecules
 - [x] FormField (label + input + error + helper text)
+- [x] AddTransactionModal (create transactions with currency support)
+- [x] EditTransactionModal (edit transactions with currency support)
+- [x] ConfirmDialog (delete confirmations)
+- [x] CurrencySelector (multi-select currency dropdown)
 
-### 4. Database Schema (85%)
+### 4. Database Schema (90%)
 
 #### Completed Tables
-- [x] `spaces` - Financial workspaces
+- [x] `spaces` - Financial workspaces (with multi-currency support)
 - [x] `space_members` - Access control
 - [x] `transaction_categories` - Income/Expense categories
 - [x] `plans` - Project-based budgets
-- [x] `transactions` - Daily transactions
+- [x] `transactions` - Daily transactions (with currency field)
 
 #### Migrations Created
 - [x] `000_simple_schema.sql` - Core tables (spaces, space_members)
 - [x] `001_rls_policies_simple.sql` - Row Level Security policies
 - [x] `002_transactions_schema.sql` - Transaction management tables
+- [x] `007_multi_currency_support.sql` - Multi-currency support (currencies[] in spaces, currency in transactions)
 
 #### Pending Tables (15%)
 - [ ] `investment_portfolios`
@@ -91,20 +96,26 @@
 
 #### Space Management (100%)
 - [x] Create new space với password
+- [x] Multi-currency selection (support 11+ currencies)
+- [x] Currency selector component
 - [x] Form validation (name min 3, password min 6)
 - [x] Real-time error feedback
 - [x] Loading states
 - [x] Success redirect to dashboard
 
-#### Transactions Management (20%)
+#### Transactions Management (75%)
 - [x] Transactions page layout
-- [x] Summary cards (Thu/Chi/Số dư)
+- [x] Summary cards grouped by currency
+- [x] Amount visibility toggle (eye icon to hide/show)
 - [x] Empty state UI
-- [ ] Add transaction form
-- [ ] Transaction list với filters
-- [ ] Edit/Delete transactions
-- [ ] Category management
+- [x] Add transaction form with currency support
+- [x] Transaction list with currency display
+- [x] Edit transactions with currency support
+- [x] Delete transactions with confirmation
+- [x] Category filtering
 - [ ] Plan-based tracking
+- [ ] Advanced filters (date range, amount range)
+- [ ] Export transactions (Excel/PDF)
 
 #### Investment Tracking (0%)
 - [ ] Stock holdings (TCBS API integration)
@@ -221,12 +232,12 @@ financial-management/
 | Infrastructure | 100% | ✅ Complete |
 | Design System | 100% | ✅ Complete |
 | UI Components | 100% | ✅ Complete |
-| Database Schema | 85% | 🟡 In Progress |
+| Database Schema | 90% | 🟢 Nearly Complete |
 | Authentication | 100% | ✅ Complete |
-| Core Features | 30% | 🟡 In Progress |
+| Core Features | 70% | 🟢 Nearly Complete |
 | Advanced Features | 0% | 🔴 Not Started |
 
-**Overall Progress: ~60%**
+**Overall Progress: ~75%**
 
 ---
 
@@ -238,11 +249,15 @@ financial-management/
 - Space management
 - Basic navigation
 
-### Phase 2: Transaction Management (🟡 IN PROGRESS - 20%)
-- Transaction CRUD
-- Categories management
-- Plans tracking
-- Daily/monthly views
+### Phase 2: Transaction Management (🟢 MOSTLY COMPLETE - 75%)
+- ✅ Transaction CRUD (Create, Read, Update, Delete)
+- ✅ Multi-currency support
+- ✅ Amount visibility toggle
+- ✅ Summary cards grouped by currency
+- ✅ Category filtering
+- ⏭️ Plans tracking
+- ⏭️ Advanced filters & date ranges
+- ⏭️ Export to Excel/PDF
 
 ### Phase 3: Budget & Savings (🔴 PLANNED)
 - Budget creation
@@ -274,7 +289,12 @@ financial-management/
 
 1. **Background Animation**: Particles animation đã replace gradient bị bể
 2. **RLS Policies**: Cần chạy manual trong Supabase (đã có script sẵn)
-3. **Transaction Features**: Chỉ mới có UI, chưa có CRUD operations
+
+## ✅ Recently Fixed
+
+1. **Transaction Creation Error**: Fixed cache error with Next.js service worker bằng cách thêm `cache: 'no-store'` vào fetch requests
+2. **Multi-currency Support**: Đã hoàn thành migration và UI cho multi-currency
+3. **Summary Display**: Summary cards giờ group theo từng loại tiền tệ
 
 ---
 
@@ -287,6 +307,30 @@ financial-management/
 
 ---
 
-**Last Updated:** 04/01/2026
-**Current Sprint:** Phase 2 - Transaction Management
-**Next Milestone:** Complete Transaction CRUD Operations
+**Last Updated:** 05/01/2026
+**Current Sprint:** Phase 2 - Transaction Management (75% Complete)
+**Next Milestone:** Advanced Filters & Export Features
+
+## 🎉 Recent Achievements (05/01/2026)
+
+### Multi-Currency Support Implementation
+- ✅ Database migration `007_multi_currency_support.sql`
+- ✅ Added `currencies TEXT[]` field to spaces table
+- ✅ Added `currency TEXT` field to transactions table
+- ✅ Created `CurrencySelector` component (supports 11+ currencies)
+- ✅ Updated all transaction modals to support currency selection
+- ✅ Summary cards now grouped by currency
+- ✅ Currency symbols displayed throughout the app
+
+### Transaction CRUD Operations
+- ✅ Create transaction with currency support
+- ✅ Read/List transactions with currency display
+- ✅ Update transaction with currency editing
+- ✅ Delete transaction with confirmation dialog
+- ✅ Real-time summary calculation per currency
+
+### UX Improvements
+- ✅ Amount visibility toggle (eye icon) for privacy
+- ✅ Amounts can be hidden/shown with one click
+- ✅ Fixed Next.js cache error for POST/PUT requests
+- ✅ Improved responsive design for transaction modals

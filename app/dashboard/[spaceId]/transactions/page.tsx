@@ -8,7 +8,7 @@ import { AddTransactionModal } from '@/components/ui/molecules/AddTransactionMod
 import { EditTransactionModal } from '@/components/ui/molecules/EditTransactionModal';
 import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
 import { CategoryIcon } from '@/components/ui/atoms/CategoryIcon';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Eye, EyeOff } from 'lucide-react';
 import { getCurrencySymbol } from '@/types';
 
 interface Space {
@@ -46,11 +46,14 @@ export default function TransactionsPage() {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [deletingTransactionId, setDeletingTransactionId] = useState<string | null>(null);
-  const [summary, setSummary] = useState({
-    totalIncome: 0,
-    totalExpense: 0,
-    balance: 0,
-  });
+  const [summary, setSummary] = useState<{
+    [currency: string]: {
+      totalIncome: number;
+      totalExpense: number;
+      balance: number;
+    };
+  }>({});
+  const [showAmounts, setShowAmounts] = useState(true);
 
   useEffect(() => {
     const currentSpaceData = localStorage.getItem('currentSpace');
@@ -84,19 +87,37 @@ export default function TransactionsPage() {
   };
 
   const calculateSummary = (txns: Transaction[]) => {
-    const totalIncome = txns
-      .filter(t => t.type === 'income')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    const summaryByCurrency: {
+      [currency: string]: {
+        totalIncome: number;
+        totalExpense: number;
+        balance: number;
+      };
+    } = {};
 
-    const totalExpense = txns
-      .filter(t => t.type === 'expense')
-      .reduce((sum, t) => sum + Number(t.amount), 0);
+    // Group transactions by currency
+    txns.forEach(t => {
+      const curr = t.currency || space?.currency || 'VND';
 
-    setSummary({
-      totalIncome,
-      totalExpense,
-      balance: totalIncome - totalExpense,
+      if (!summaryByCurrency[curr]) {
+        summaryByCurrency[curr] = {
+          totalIncome: 0,
+          totalExpense: 0,
+          balance: 0,
+        };
+      }
+
+      if (t.type === 'income') {
+        summaryByCurrency[curr].totalIncome += Number(t.amount);
+      } else {
+        summaryByCurrency[curr].totalExpense += Number(t.amount);
+      }
+
+      summaryByCurrency[curr].balance =
+        summaryByCurrency[curr].totalIncome - summaryByCurrency[curr].totalExpense;
     });
+
+    setSummary(summaryByCurrency);
   };
 
   const formatCurrency = (amount: number) => {
@@ -198,35 +219,94 @@ export default function TransactionsPage() {
           </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid gap-4 md:grid-cols-3 mb-8">
-          <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
-            <CardHeader>
-              <CardDescription>Tổng Thu</CardDescription>
-              <CardTitle className="text-2xl text-stone-100">
-                +{formatCurrency(summary.totalIncome)} {space.currency}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+        {/* Summary Cards - Grouped by Currency */}
+        {Object.keys(summary).length > 0 ? (
+          Object.entries(summary).map(([currency, data]) => (
+            <div key={currency} className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-semibold text-stone-100">
+                  {getCurrencySymbol(currency)} {currency}
+                </h2>
+                <button
+                  onClick={() => setShowAmounts(!showAmounts)}
+                  className="p-1.5 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
+                  title={showAmounts ? "Ẩn số tiền" : "Hiện số tiền"}
+                >
+                  {showAmounts ? <Eye size={16} /> : <EyeOff size={16} />}
+                </button>
+              </div>
+              <div className="grid gap-4 md:grid-cols-3">
+                <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+                  <CardHeader>
+                    <CardDescription>Tổng Thu</CardDescription>
+                    <CardTitle className="text-2xl text-stone-100">
+                      {showAmounts ? (
+                        <>+{formatCurrency(data.totalIncome)} {getCurrencySymbol(currency)}</>
+                      ) : (
+                        <span className="text-stone-500">••••••</span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
 
-          <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
-            <CardHeader>
-              <CardDescription>Tổng Chi</CardDescription>
-              <CardTitle className="text-2xl text-stone-100">
-                -{formatCurrency(summary.totalExpense)} {space.currency}
-              </CardTitle>
-            </CardHeader>
-          </Card>
+                <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+                  <CardHeader>
+                    <CardDescription>Tổng Chi</CardDescription>
+                    <CardTitle className="text-2xl text-stone-100">
+                      {showAmounts ? (
+                        <>-{formatCurrency(data.totalExpense)} {getCurrencySymbol(currency)}</>
+                      ) : (
+                        <span className="text-stone-500">••••••</span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
 
-          <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
-            <CardHeader>
-              <CardDescription>Số Dư</CardDescription>
-              <CardTitle className="text-2xl text-stone-100">
-                {summary.balance >= 0 ? '+' : ''}{formatCurrency(summary.balance)} {space.currency}
-              </CardTitle>
-            </CardHeader>
-          </Card>
-        </div>
+                <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+                  <CardHeader>
+                    <CardDescription>Số Dư</CardDescription>
+                    <CardTitle className="text-2xl text-stone-100">
+                      {showAmounts ? (
+                        <>{data.balance >= 0 ? '+' : ''}{formatCurrency(data.balance)} {getCurrencySymbol(currency)}</>
+                      ) : (
+                        <span className="text-stone-500">••••••</span>
+                      )}
+                    </CardTitle>
+                  </CardHeader>
+                </Card>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="grid gap-4 md:grid-cols-3 mb-8">
+            <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+              <CardHeader>
+                <CardDescription>Tổng Thu</CardDescription>
+                <CardTitle className="text-2xl text-stone-100">
+                  +0 {getCurrencySymbol(space.currency)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+              <CardHeader>
+                <CardDescription>Tổng Chi</CardDescription>
+                <CardTitle className="text-2xl text-stone-100">
+                  -0 {getCurrencySymbol(space.currency)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+
+            <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+              <CardHeader>
+                <CardDescription>Số Dư</CardDescription>
+                <CardTitle className="text-2xl text-stone-100">
+                  +0 {getCurrencySymbol(space.currency)}
+                </CardTitle>
+              </CardHeader>
+            </Card>
+          </div>
+        )}
 
         {/* Transactions List */}
         <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">

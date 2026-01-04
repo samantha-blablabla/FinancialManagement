@@ -106,6 +106,7 @@ export function EditTransactionModal({ isOpen, onClose, spaceId, spaceCurrencies
         headers: {
           'Content-Type': 'application/json',
         },
+        cache: 'no-store',
         body: JSON.stringify({
           id: transaction.id,
           type,
