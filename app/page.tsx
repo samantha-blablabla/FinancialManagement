@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
 import { FormField } from '@/components/ui/molecules/FormField';
-import { Lock } from 'lucide-react';
+import { Lock, Pencil, Trash2, KeyRound } from 'lucide-react';
+import { EditSpaceModal } from '@/components/ui/molecules/EditSpaceModal';
+import { ConfirmDialog } from '@/components/ui/molecules/ConfirmDialog';
 
 interface Space {
   id: string;
@@ -28,6 +30,17 @@ export default function HomePage() {
   const [loginPassword, setLoginPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
+
+  // Space management state
+  const [editingSpace, setEditingSpace] = useState<Space | null>(null);
+  const [deletingSpaceId, setDeletingSpaceId] = useState<string | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [resetSpaceId, setResetSpaceId] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmNewPassword, setConfirmNewPassword] = useState('');
+  const [resetError, setResetError] = useState('');
 
   // Validation state
   const [errors, setErrors] = useState<{
@@ -229,6 +242,99 @@ export default function HomePage() {
     setLoginError('');
   };
 
+  const handleEditSpace = (e: React.MouseEvent, space: Space) => {
+    e.stopPropagation();
+    setEditingSpace(space);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteSpace = (e: React.MouseEvent, spaceId: string) => {
+    e.stopPropagation();
+    setDeletingSpaceId(spaceId);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingSpaceId) return;
+
+    try {
+      const response = await fetch(`/api/spaces/delete?id=${deletingSpaceId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh spaces list
+        fetchSpaces();
+        setDeletingSpaceId(null);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Không thể xóa không gian');
+      }
+    } catch (error) {
+      console.error('Error deleting space:', error);
+      alert('Không thể kết nối đến server');
+    }
+  };
+
+  const handleEditSuccess = () => {
+    fetchSpaces();
+  };
+
+  const handleForgotPassword = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setShowForgotPassword(true);
+    setSelectedSpace(null);
+  };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setResetError('');
+
+    if (newPassword.length < 6) {
+      setResetError('Mật khẩu phải có ít nhất 6 ký tự');
+      return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+      setResetError('Mật khẩu xác nhận không khớp');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/spaces/reset-password', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          spaceId: resetSpaceId,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setResetError(data.error || 'Không thể đặt lại mật khẩu');
+        return;
+      }
+
+      alert('Đặt lại mật khẩu thành công!');
+      setShowForgotPassword(false);
+      setResetSpaceId('');
+      setNewPassword('');
+      setConfirmNewPassword('');
+      setResetError('');
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      setResetError('Không thể kết nối đến server');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4 md:p-8 animate-gradient">
       {/* Particles Background */}
@@ -359,23 +465,41 @@ export default function HomePage() {
               ) : (
                 <div className="grid gap-3">
                   {spaces.map((space) => (
-                    <button
+                    <div
                       key={space.id}
-                      onClick={() => handleSpaceLogin(space)}
-                      className="w-full p-4 bg-stone-800/30 border border-stone-700/50 rounded-lg hover:bg-stone-800/50 hover:border-stone-600/50 transition-all text-left group"
+                      className="w-full p-4 bg-stone-800/30 border border-stone-700/50 rounded-lg hover:bg-stone-800/50 hover:border-stone-600/50 transition-all group"
                     >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="text-lg font-semibold text-stone-100 mb-1">
+                      <div className="flex items-center justify-between gap-3">
+                        <button
+                          onClick={() => handleSpaceLogin(space)}
+                          className="flex-1 text-left min-w-0"
+                        >
+                          <h3 className="text-lg font-semibold text-stone-100 mb-1 truncate">
                             {space.name}
                           </h3>
                           <p className="text-sm text-stone-400">
                             Tiền tệ: {space.currency}
                           </p>
+                        </button>
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={(e) => handleEditSpace(e, space)}
+                            className="p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
+                            title="Chỉnh sửa"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <button
+                            onClick={(e) => handleDeleteSpace(e, space.id)}
+                            className="p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Xóa"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                          <Lock className="text-stone-500 group-hover:text-stone-400 transition-colors ml-1" size={20} />
                         </div>
-                        <Lock className="text-stone-500 group-hover:text-stone-400 transition-colors" size={20} />
                       </div>
-                    </button>
+                    </div>
                   ))}
                 </div>
               )}
@@ -393,7 +517,7 @@ export default function HomePage() {
         )}
 
         {/* Password Login Form */}
-        {showSelectSpace && selectedSpace && (
+        {showSelectSpace && selectedSpace && !showForgotPassword && (
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
               <CardTitle>Đăng nhập vào {selectedSpace.name}</CardTitle>
@@ -412,6 +536,14 @@ export default function HomePage() {
                   onChange={(e) => setLoginPassword(e.target.value)}
                   error={loginError}
                 />
+                <button
+                  type="button"
+                  onClick={handleForgotPassword}
+                  className="text-sm text-stone-400 hover:text-stone-300 flex items-center gap-2 transition-colors"
+                >
+                  <KeyRound size={14} />
+                  Quên mật khẩu?
+                </button>
                 <div className="flex gap-3 pt-2">
                   <Button
                     variant="ghost"
@@ -435,6 +567,108 @@ export default function HomePage() {
             </CardContent>
           </Card>
         )}
+
+        {/* Forgot Password Form */}
+        {showForgotPassword && (
+          <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+            <CardHeader>
+              <CardTitle>Đặt lại mật khẩu</CardTitle>
+              <CardDescription>
+                Chọn không gian và nhập mật khẩu mới
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleResetPassword} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-stone-300 mb-2">
+                    Chọn không gian *
+                  </label>
+                  <select
+                    value={resetSpaceId}
+                    onChange={(e) => setResetSpaceId(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-stone-800/50 border border-stone-700/50 rounded-lg text-stone-100 focus:outline-none focus:ring-2 focus:ring-stone-500 focus:border-transparent"
+                    required
+                  >
+                    <option value="">-- Chọn không gian --</option>
+                    {spaces.map((space) => (
+                      <option key={space.id} value={space.id}>
+                        {space.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <FormField
+                  label="Mật khẩu mới"
+                  type="password"
+                  placeholder="Nhập mật khẩu mới (tối thiểu 6 ký tự)"
+                  required
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+                <FormField
+                  label="Xác nhận mật khẩu mới"
+                  type="password"
+                  placeholder="Nhập lại mật khẩu mới"
+                  required
+                  value={confirmNewPassword}
+                  onChange={(e) => setConfirmNewPassword(e.target.value)}
+                  error={resetError}
+                />
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      setShowForgotPassword(false);
+                      setResetSpaceId('');
+                      setNewPassword('');
+                      setConfirmNewPassword('');
+                      setResetError('');
+                    }}
+                    disabled={isLoading}
+                    className="flex-1"
+                  >
+                    Quay lại
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="flex-1"
+                    isLoading={isLoading}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Đang đặt lại...' : 'Đặt lại mật khẩu'}
+                  </Button>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Edit Space Modal */}
+        <EditSpaceModal
+          isOpen={isEditModalOpen}
+          onClose={() => {
+            setIsEditModalOpen(false);
+            setEditingSpace(null);
+          }}
+          space={editingSpace}
+          onSuccess={handleEditSuccess}
+        />
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          isOpen={isDeleteDialogOpen}
+          onClose={() => {
+            setIsDeleteDialogOpen(false);
+            setDeletingSpaceId(null);
+          }}
+          onConfirm={handleConfirmDelete}
+          title="Xóa không gian"
+          message="Bạn có chắc chắn muốn xóa không gian này? Tất cả dữ liệu bao gồm giao dịch, danh mục sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác."
+          confirmText="Xóa vĩnh viễn"
+          cancelText="Hủy"
+          variant="danger"
+        />
       </div>
     </div>
   );
