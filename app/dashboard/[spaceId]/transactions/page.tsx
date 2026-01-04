@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
 import { AddTransactionModal } from '@/components/ui/molecules/AddTransactionModal';
+import { DynamicIcon } from '@/components/ui/atoms/DynamicIcon';
+import { Pencil, Trash2 } from 'lucide-react';
 
 interface Space {
   id: string;
@@ -156,7 +158,7 @@ export default function TransactionsPage() {
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
               <CardDescription>Tổng Thu</CardDescription>
-              <CardTitle className="text-2xl text-green-400">
+              <CardTitle className="text-2xl text-stone-100">
                 +{formatCurrency(summary.totalIncome)} {space.currency}
               </CardTitle>
             </CardHeader>
@@ -165,7 +167,7 @@ export default function TransactionsPage() {
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
               <CardDescription>Tổng Chi</CardDescription>
-              <CardTitle className="text-2xl text-red-400">
+              <CardTitle className="text-2xl text-stone-100">
                 -{formatCurrency(summary.totalExpense)} {space.currency}
               </CardTitle>
             </CardHeader>
@@ -174,7 +176,7 @@ export default function TransactionsPage() {
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
               <CardDescription>Số Dư</CardDescription>
-              <CardTitle className={`text-2xl ${summary.balance >= 0 ? 'text-green-400' : 'text-red-400'}`}>
+              <CardTitle className="text-2xl text-stone-100">
                 {summary.balance >= 0 ? '+' : ''}{formatCurrency(summary.balance)} {space.currency}
               </CardTitle>
             </CardHeader>
@@ -211,7 +213,7 @@ export default function TransactionsPage() {
                 {transactions.map((transaction) => {
                   // Handle transactions with deleted or missing categories
                   const category = transaction.category || {
-                    icon: '💰',
+                    icon: 'Wallet',
                     name: 'Không xác định',
                     color: '#64748b'
                   };
@@ -223,10 +225,10 @@ export default function TransactionsPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                          className="w-12 h-12 rounded-lg flex items-center justify-center"
                           style={{ backgroundColor: `${category.color}20` }}
                         >
-                          {category.icon}
+                          <DynamicIcon name={category.icon} size={24} style={{ color: category.color }} />
                         </div>
                         <div>
                           <h3 className="text-stone-100 font-medium">
@@ -239,14 +241,34 @@ export default function TransactionsPage() {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div
-                          className={`text-lg font-semibold ${
-                            transaction.type === 'income' ? 'text-green-400' : 'text-red-400'
-                          }`}
-                        >
-                          {transaction.type === 'income' ? '+' : '-'}
-                          {formatCurrency(transaction.amount)} {space.currency}
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="text-lg font-semibold text-stone-100">
+                            {transaction.type === 'income' ? '+' : '-'}
+                            {formatCurrency(transaction.amount)} {space.currency}
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => {
+                              // TODO: Implement edit functionality
+                              console.log('Edit transaction:', transaction.id);
+                            }}
+                            className="p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
+                            title="Chỉnh sửa"
+                          >
+                            <Pencil size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              // TODO: Implement delete functionality
+                              console.log('Delete transaction:', transaction.id);
+                            }}
+                            className="p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            title="Xóa"
+                          >
+                            <Trash2 size={18} />
+                          </button>
                         </div>
                       </div>
                     </div>
