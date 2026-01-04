@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
 import { AddTransactionModal } from '@/components/ui/molecules/AddTransactionModal';
+import { EditTransactionModal } from '@/components/ui/molecules/EditTransactionModal';
 import { Pencil, Trash2 } from 'lucide-react';
 
 interface Space {
@@ -20,6 +21,7 @@ interface Transaction {
   description: string;
   date: string;
   notes: string | null;
+  category_id: string;
   category: {
     id: string;
     name: string;
@@ -35,6 +37,8 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
   const [summary, setSummary] = useState({
     totalIncome: 0,
     totalExpense: 0,
@@ -103,6 +107,36 @@ export default function TransactionsPage() {
   const handleTransactionAdded = () => {
     if (space) {
       fetchTransactions(space.id);
+    }
+  };
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setIsEditModalOpen(true);
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    if (!confirm('Bạn có chắc chắn muốn xóa giao dịch này?')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/transactions/delete?id=${transactionId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Refresh transactions list
+        if (space) {
+          fetchTransactions(space.id);
+        }
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Không thể xóa giao dịch');
+      }
+    } catch (error) {
+      console.error('Error deleting transaction:', error);
+      alert('Không thể kết nối đến server');
     }
   };
 
@@ -249,20 +283,14 @@ export default function TransactionsPage() {
                         </div>
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => {
-                              // TODO: Implement edit functionality
-                              console.log('Edit transaction:', transaction.id);
-                            }}
+                            onClick={() => handleEditTransaction(transaction)}
                             className="p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
                             title="Chỉnh sửa"
                           >
                             <Pencil size={18} />
                           </button>
                           <button
-                            onClick={() => {
-                              // TODO: Implement delete functionality
-                              console.log('Delete transaction:', transaction.id);
-                            }}
+                            onClick={() => handleDeleteTransaction(transaction.id)}
                             className="p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Xóa"
                           >
@@ -284,6 +312,18 @@ export default function TransactionsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         spaceId={space.id}
+        onSuccess={handleTransactionAdded}
+      />
+
+      {/* Edit Transaction Modal */}
+      <EditTransactionModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTransaction(null);
+        }}
+        spaceId={space.id}
+        transaction={editingTransaction}
         onSuccess={handleTransactionAdded}
       />
     </div>
