@@ -1,21 +1,33 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/atoms/Card';
 import { Button } from '@/components/ui/atoms/Button';
 import { FormField } from '@/components/ui/molecules/FormField';
+import { Lock } from 'lucide-react';
+
+interface Space {
+  id: string;
+  name: string;
+  currency: string;
+  created_at: string;
+}
 
 export default function HomePage() {
   const router = useRouter();
   const [showCreateSpace, setShowCreateSpace] = useState(false);
   const [showSelectSpace, setShowSelectSpace] = useState(false);
+  const [spaces, setSpaces] = useState<Space[]>([]);
+  const [selectedSpace, setSelectedSpace] = useState<Space | null>(null);
 
   // Form state
   const [spaceName, setSpaceName] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [loginError, setLoginError] = useState('');
 
   // Validation state
   const [errors, setErrors] = useState<{
@@ -149,6 +161,74 @@ export default function HomePage() {
     setErrors({ spaceName: '', password: '', confirmPassword: '' });
   };
 
+  // Fetch spaces when "Select Space" is clicked
+  useEffect(() => {
+    if (showSelectSpace) {
+      fetchSpaces();
+    }
+  }, [showSelectSpace]);
+
+  const fetchSpaces = async () => {
+    try {
+      const response = await fetch('/api/spaces/list');
+      if (response.ok) {
+        const data = await response.json();
+        setSpaces(data.spaces || []);
+      }
+    } catch (error) {
+      console.error('Error fetching spaces:', error);
+    }
+  };
+
+  const handleSpaceLogin = async (space: Space) => {
+    setSelectedSpace(space);
+    setLoginPassword('');
+    setLoginError('');
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedSpace) return;
+
+    setIsLoading(true);
+    setLoginError('');
+
+    try {
+      const response = await fetch('/api/spaces/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          spaceId: selectedSpace.id,
+          password: loginPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setLoginError(data.error || 'Mật khẩu không đúng');
+        return;
+      }
+
+      // Store space info and redirect
+      localStorage.setItem('currentSpace', JSON.stringify(data.space));
+      window.location.href = `/dashboard/${data.space.id}`;
+    } catch (error) {
+      console.error('Error logging in:', error);
+      setLoginError('Không thể kết nối đến server');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBackToSpaceList = () => {
+    setSelectedSpace(null);
+    setLoginPassword('');
+    setLoginError('');
+  };
+
   return (
     <div className="relative min-h-screen flex flex-col items-center justify-center p-4 md:p-8 animate-gradient">
       {/* Particles Background */}
@@ -262,19 +342,43 @@ export default function HomePage() {
         )}
 
         {/* Select Space Form */}
-        {showSelectSpace && (
+        {showSelectSpace && !selectedSpace && (
           <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
             <CardHeader>
               <CardTitle>Chọn Space</CardTitle>
               <CardDescription>
-                Nhập mật khẩu để truy cập vào space của bạn
+                Chọn không gian để truy cập
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-sm text-stone-400 bg-stone-950/50 p-4 rounded-md">
-                <p className="font-medium text-stone-300 mb-2">Chưa có space nào được tạo</p>
-                <p>Vui lòng tạo một space mới để bắt đầu sử dụng ứng dụng.</p>
-              </div>
+              {spaces.length === 0 ? (
+                <div className="text-sm text-stone-400 bg-stone-950/50 p-4 rounded-md">
+                  <p className="font-medium text-stone-300 mb-2">Chưa có space nào được tạo</p>
+                  <p>Vui lòng tạo một space mới để bắt đầu sử dụng ứng dụng.</p>
+                </div>
+              ) : (
+                <div className="grid gap-3">
+                  {spaces.map((space) => (
+                    <button
+                      key={space.id}
+                      onClick={() => handleSpaceLogin(space)}
+                      className="w-full p-4 bg-stone-800/30 border border-stone-700/50 rounded-lg hover:bg-stone-800/50 hover:border-stone-600/50 transition-all text-left group"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h3 className="text-lg font-semibold text-stone-100 mb-1">
+                            {space.name}
+                          </h3>
+                          <p className="text-sm text-stone-400">
+                            Tiền tệ: {space.currency}
+                          </p>
+                        </div>
+                        <Lock className="text-stone-500 group-hover:text-stone-400 transition-colors" size={20} />
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )}
               <div className="flex gap-3 pt-2">
                 <Button
                   variant="ghost"
@@ -284,6 +388,50 @@ export default function HomePage() {
                   Quay lại
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Password Login Form */}
+        {showSelectSpace && selectedSpace && (
+          <Card className="backdrop-blur-xl bg-stone-900/40 border-stone-700/50 shadow-xl">
+            <CardHeader>
+              <CardTitle>Đăng nhập vào {selectedSpace.name}</CardTitle>
+              <CardDescription>
+                Nhập mật khẩu để truy cập không gian này
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <form onSubmit={handleLoginSubmit} className="space-y-4">
+                <FormField
+                  label="Mật khẩu"
+                  type="password"
+                  placeholder="Nhập mật khẩu"
+                  required
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  error={loginError}
+                />
+                <div className="flex gap-3 pt-2">
+                  <Button
+                    variant="ghost"
+                    onClick={handleBackToSpaceList}
+                    disabled={isLoading}
+                    className="flex-1"
+                  >
+                    Quay lại
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    className="flex-1"
+                    isLoading={isLoading}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? 'Đang đăng nhập...' : 'Đăng nhập'}
+                  </Button>
+                </div>
+              </form>
             </CardContent>
           </Card>
         )}
