@@ -75,7 +75,8 @@ export default function DashboardPage() {
                 Không gian quản lý tài chính của bạn
               </p>
             </div>
-            <Button
+            {/* Logout button temporarily hidden - will implement proper auth later */}
+            {/* <Button
               variant="ghost"
               onClick={() => {
                 localStorage.removeItem('currentSpace');
@@ -83,7 +84,7 @@ export default function DashboardPage() {
               }}
             >
               Đăng xuất
-            </Button>
+            </Button> */}
           </div>
         </div>
 
