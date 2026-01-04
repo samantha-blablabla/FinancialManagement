@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/com
 import { Button } from '@/components/ui/atoms/Button';
 import { AddTransactionModal } from '@/components/ui/molecules/AddTransactionModal';
 import { EditTransactionModal } from '@/components/ui/molecules/EditTransactionModal';
+import { CategoryIcon } from '@/components/ui/atoms/CategoryIcon';
 import { Pencil, Trash2 } from 'lucide-react';
 
 interface Space {
@@ -242,11 +243,11 @@ export default function TransactionsPage() {
                 </Button>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-2 md:space-y-3">
                 {transactions.map((transaction) => {
                   // Handle transactions with deleted or missing categories
                   const category = transaction.category || {
-                    icon: '💰',
+                    icon: 'Wallet',
                     name: 'Không xác định',
                     color: '#64748b'
                   };
@@ -254,47 +255,50 @@ export default function TransactionsPage() {
                   return (
                     <div
                       key={transaction.id}
-                      className="flex items-center justify-between p-4 bg-stone-800/30 border border-stone-700/30 rounded-lg hover:bg-stone-800/50 transition-colors"
+                      className="flex items-center justify-between p-3 md:p-4 bg-stone-800/30 border border-stone-700/30 rounded-lg hover:bg-stone-800/50 transition-colors gap-2 md:gap-4"
                     >
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-2 md:gap-4 flex-1 min-w-0">
                         <div
-                          className="w-12 h-12 rounded-lg flex items-center justify-center text-2xl"
+                          className="w-10 h-10 md:w-12 md:h-12 rounded-lg flex items-center justify-center flex-shrink-0"
                           style={{ backgroundColor: `${category.color}20` }}
                         >
-                          {category.icon}
+                          <CategoryIcon name={category.icon} size={20} style={{ color: category.color }} className="md:w-6 md:h-6" />
                         </div>
-                        <div>
-                          <h3 className="text-stone-100 font-medium">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="text-stone-100 font-medium text-sm md:text-base truncate">
                             {transaction.description}
                           </h3>
-                          <div className="flex items-center gap-2 text-sm text-stone-400">
-                            <span>{category.name}</span>
-                            <span>•</span>
-                            <span>{formatDate(transaction.date)}</span>
+                          <div className="flex items-center gap-1 md:gap-2 text-xs md:text-sm text-stone-400">
+                            <span className="truncate">{category.name}</span>
+                            <span className="hidden sm:inline">•</span>
+                            <span className="hidden sm:inline">{formatDate(transaction.date)}</span>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1 md:gap-4 flex-shrink-0">
                         <div className="text-right">
-                          <div className="text-lg font-semibold text-stone-100">
+                          <div className="text-sm md:text-lg font-semibold text-stone-100 whitespace-nowrap">
                             {transaction.type === 'income' ? '+' : '-'}
-                            {formatCurrency(transaction.amount)} {space.currency}
+                            {formatCurrency(transaction.amount)}
+                          </div>
+                          <div className="text-xs text-stone-500 md:hidden">
+                            {formatDate(transaction.date)}
                           </div>
                         </div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1">
                           <button
                             onClick={() => handleEditTransaction(transaction)}
-                            className="p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 text-stone-400 hover:text-stone-100 hover:bg-stone-700/50 rounded-lg transition-colors"
                             title="Chỉnh sửa"
                           >
-                            <Pencil size={18} />
+                            <Pencil size={16} className="md:w-[18px] md:h-[18px]" />
                           </button>
                           <button
                             onClick={() => handleDeleteTransaction(transaction.id)}
-                            className="p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                            className="p-1.5 md:p-2 text-stone-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                             title="Xóa"
                           >
-                            <Trash2 size={18} />
+                            <Trash2 size={16} className="md:w-[18px] md:h-[18px]" />
                           </button>
                         </div>
                       </div>
