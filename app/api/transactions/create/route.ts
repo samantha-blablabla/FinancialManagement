@@ -3,7 +3,7 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function POST(request: NextRequest) {
   try {
-    const { spaceId, type, amount, description, date, categoryId, notes, planId } = await request.json();
+    const { spaceId, type, amount, currency = 'VND', description, date, categoryId, notes, planId } = await request.json();
 
     // Validate required fields
     if (!spaceId || !type || !amount || !description || !date || !categoryId) {
@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
         space_id: spaceId,
         type,
         amount,
+        currency, // Add currency field
         description,
         date,
         category_id: categoryId,

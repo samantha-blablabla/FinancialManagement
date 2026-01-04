@@ -13,13 +13,15 @@ import { Pencil, Trash2 } from 'lucide-react';
 interface Space {
   id: string;
   name: string;
-  currency: string;
+  currency: string; // Legacy field
+  currencies: string[]; // New field - array of currencies
 }
 
 interface Transaction {
   id: string;
   type: 'income' | 'expense';
   amount: number;
+  currency?: string; // New field - which currency this transaction uses
   description: string;
   date: string;
   notes: string | null;
@@ -324,6 +326,7 @@ export default function TransactionsPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         spaceId={space.id}
+        spaceCurrencies={space.currencies || [space.currency || 'VND']}
         onSuccess={handleTransactionAdded}
       />
 
