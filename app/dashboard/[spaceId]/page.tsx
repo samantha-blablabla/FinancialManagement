@@ -17,18 +17,31 @@ export default function DashboardPage() {
   const [space, setSpace] = useState<Space | null>(null);
 
   useEffect(() => {
+    console.log('Dashboard mounted, spaceId from URL:', params.spaceId);
+
     // Load space info from localStorage
     const currentSpaceData = localStorage.getItem('currentSpace');
-    if (currentSpaceData) {
-      const spaceData = JSON.parse(currentSpaceData);
+    console.log('LocalStorage data:', currentSpaceData);
 
-      // Verify space ID matches
-      if (spaceData.id === params.spaceId) {
-        setSpace(spaceData);
-      } else {
+    if (currentSpaceData) {
+      try {
+        const spaceData = JSON.parse(currentSpaceData);
+        console.log('Parsed space data:', spaceData);
+
+        // Verify space ID matches
+        if (spaceData.id === params.spaceId) {
+          console.log('Space ID matches, setting space state');
+          setSpace(spaceData);
+        } else {
+          console.log('Space ID mismatch, redirecting to home');
+          router.push('/');
+        }
+      } catch (error) {
+        console.error('Error parsing localStorage data:', error);
         router.push('/');
       }
     } else {
+      console.log('No localStorage data found, redirecting to home');
       router.push('/');
     }
   }, [params.spaceId, router]);

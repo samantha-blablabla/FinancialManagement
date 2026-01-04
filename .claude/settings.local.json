@@ -17,7 +17,9 @@
       "Bash(git commit:*)",
       "Bash(git remote add:*)",
       "Bash(git branch:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(node -e \"\nconst { createClient } = require\\(''@supabase/supabase-js''\\);\nconst supabase = createClient\\(\n  ''https://emrkibqfkjjwpupqfger.supabase.co'',\n  ''eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVtcmtpYnFma2pqd3B1cHFmZ2VyIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NzQ4ODQyNywiZXhwIjoyMDgzMDY0NDI3fQ.l6hxwisxNMDIAkF09hEmCqAUokaNT7rmp4tNq2Xgi_8''\n\\);\n\n\\(async \\(\\) => {\n  const { data, error } = await supabase.rpc\\(''version''\\);\n  if \\(error\\) console.log\\(''Error:'', error\\);\n  else console.log\\(''Connected! Version:'', data\\);\n  \n  // Check tables\n  const result = await supabase.from\\(''spaces''\\).select\\(''count''\\).single\\(\\);\n  console.log\\(''Spaces table check:'', result\\);\n}\\)\\(\\);\n\")",
+      "Bash(node -e:*)"
     ]
   }
 }

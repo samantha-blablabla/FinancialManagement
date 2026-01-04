@@ -113,6 +113,7 @@ export default function HomePage() {
       const data = await response.json();
 
       if (!response.ok) {
+        console.error('Space creation failed:', data);
         setErrors(prev => ({
           ...prev,
           spaceName: data.error || 'Đã xảy ra lỗi khi tạo space',
@@ -120,11 +121,15 @@ export default function HomePage() {
         return;
       }
 
+      console.log('Space created successfully:', data.space);
+
       // Store space info in localStorage
       localStorage.setItem('currentSpace', JSON.stringify(data.space));
+      console.log('Saved to localStorage:', localStorage.getItem('currentSpace'));
 
-      // Redirect to dashboard
-      router.push(`/dashboard/${data.space.id}`);
+      // Redirect to dashboard using window.location for more reliable navigation
+      console.log('Redirecting to:', `/dashboard/${data.space.id}`);
+      window.location.href = `/dashboard/${data.space.id}`;
     } catch (error) {
       console.error('Error creating space:', error);
       setErrors(prev => ({
