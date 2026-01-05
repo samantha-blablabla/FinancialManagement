@@ -3,10 +3,10 @@ import { createClient as createSupabaseClient } from '@supabase/supabase-js';
 
 export async function PUT(request: NextRequest) {
   try {
-    const { id, name, currency } = await request.json();
+    const { id, name, currencies } = await request.json();
 
     // Validate required fields
-    if (!id || !name || !currency) {
+    if (!id || !name || !currencies || !Array.isArray(currencies) || currencies.length === 0) {
       return NextResponse.json(
         { error: 'Thiếu thông tin bắt buộc' },
         { status: 400 }
@@ -32,11 +32,12 @@ export async function PUT(request: NextRequest) {
       }
     );
 
+    // Update space with currencies array
     const { data: space, error } = await supabase
       .from('spaces')
       .update({
         name: name.trim(),
-        currency,
+        currencies,
       })
       .eq('id', id)
       .select()

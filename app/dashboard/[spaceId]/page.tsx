@@ -11,7 +11,8 @@ import { Settings, Pencil, Trash2 } from 'lucide-react';
 interface Space {
   id: string;
   name: string;
-  currency: string;
+  currency: string; // Legacy
+  currencies?: string[]; // Multi-currency support
 }
 
 export default function DashboardPage() {
@@ -148,7 +149,7 @@ export default function DashboardPage() {
                         className="w-full flex items-center gap-3 px-4 py-3 text-sm text-stone-300 hover:bg-stone-800/50 rounded-lg transition-colors"
                       >
                         <Pencil size={16} />
-                        Chỉnh sửa không gian
+                        Chỉnh sửa tiền tệ
                       </button>
                       <button
                         onClick={() => {
